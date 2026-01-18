@@ -1,0 +1,196 @@
+// prisma/schema.prisma
+
+// prisma/schema.prisma - Updated with password field
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  name          String
+  password      String?         // Added password field
+  role          Role            @default(SEEKER)
+  profile       Profile?
+  jobs          Job[]
+  applications  Application[]
+  messagesSent  Message[]       @relation("SentMessages")
+  messagesReceived Message[]    @relation("ReceivedMessages")
+  calendarEvents CalendarEvent[]
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  location      Location?
+  createdAt     DateTime        @default(now())
+  
+  @@map("users")
+}
+
+
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  bio         String?
+  skills      String[]
+  experience  String[]
+  portfolio   Portfolio[]
+  rating      Float    @default(0)
+  reviewCount Int      @default(0)
+}
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id])
+  title       String
+  description String
+  mediaUrls   String[]
+  category    String
+  createdAt   DateTime @default(now())
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  employerId  String
+  employer    User     @relation(fields: [employerId], references: [id])
+  category    String
+  jobType     JobType  // CASUAL, LONG_TERM, ONE_TIME
+  status      JobStatus @default(AVAILABLE)
+  location    Location?
+  payAmount   Float?
+  payType     PayType  // HOURLY, FIXED, NEGOTIABLE
+  startTime   DateTime?
+  endTime     DateTime?
+  applications Application[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Application {
+  id          String   @id @default(cuid())
+  jobId       String
+  job         Job      @relation(fields: [jobId], references: [id])
+  seekerId    String
+  seeker      User     @relation(fields: [seekerId], references: [id])
+  status      ApplicationStatus @default(PENDING)
+  message     String?
+  createdAt   DateTime @default(now())
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  userId    String?  @unique
+  jobId     String?  @unique
+  latitude  Float
+  longitude Float
+  address   String
+  city      String
+  state     String
+  country   String
+}
+
+model CalendarEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  jobId       String?  @unique
+  job         Job?     @relation(fields: [jobId], references: [id])
+  title       String
+  description String
+  startTime   DateTime
+  endTime     DateTime
+  status      EventStatus @default(SCHEDULED)
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  content     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  content     String
+  mediaUrls   String[]
+  category    String
+  likes       Like[]
+  comments    Comment[]
+  isPromoted  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  content     String
+  createdAt   DateTime @default(now())
+}
+
+model Like {
+  id          String   @id @default(cuid())
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+enum Role {
+  SEEKER
+  EMPLOYER
+  ADMIN
+}
+
+enum JobType {
+  CASUAL
+  LONG_TERM
+  ONE_TIME
+}
+
+enum JobStatus {
+  AVAILABLE
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  UNAVAILABLE
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum PayType {
+  HOURLY
+  FIXED
+  NEGOTIABLE
+}
+
+enum EventStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
