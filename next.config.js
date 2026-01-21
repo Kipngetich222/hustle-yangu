@@ -1,14 +1,25 @@
-// // next.config.ts
-// import type { NextConfig } from "next";
-
-// const nextConfig: NextConfig = {
+// // next.config.js
+// /** @type {import('next').NextConfig} */
+// const nextConfig = {
 //   reactCompiler: true,
 //   images: {
-//     domains: [
-//       'lh3.googleusercontent.com',
-//       'avatars.githubusercontent.com',
-//       'res.cloudinary.com',
-//       'localhost',
+//     remotePatterns: [
+//       {
+//         protocol: 'https',
+//         hostname: 'lh3.googleusercontent.com',
+//       },
+//       {
+//         protocol: 'https',
+//         hostname: 'avatars.githubusercontent.com',
+//       },
+//       {
+//         protocol: 'https',
+//         hostname: 'res.cloudinary.com',
+//       },
+//       {
+//         protocol: 'http',
+//         hostname: 'localhost',
+//       },
 //     ],
 //   },
 //   async headers() {
@@ -26,13 +37,11 @@
 //   },
 // };
 
-// export default nextConfig;
+// module.exports = nextConfig;
 
-// next.config.ts
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  reactCompiler: true,
+// next.config.js - Updated
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
       {
@@ -68,4 +77,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
